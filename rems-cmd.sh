@@ -9,12 +9,14 @@
 
 set -o errexit
 
+export AWS_PROFILE="agp-dev" 
 # the namespace must pre-exist as a CloudMap namespace in the account of deployment
 CLOUD_MAP_NAMESPACE=$(head -1 rems-cloudmap-namespace.txt)
 
 # once deployed our CDK will register the lambda into the namespace
 LAMBDA_ARN=$(aws servicediscovery discover-instances \
            --namespace-name "$CLOUD_MAP_NAMESPACE" \
+           --profile "$AWS_PROFILE" \
            --service-name "rems" \
            --output text --query "Instances[].Attributes.lambdaArn")
 

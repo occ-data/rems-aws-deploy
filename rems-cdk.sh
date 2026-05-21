@@ -2,6 +2,7 @@
 
 set -o errexit
 
+export AWS_PROFILE="agp-dev" 
 # we can fetch these settings however we want - depending on our security settings - feel free to replace
 # with any technique that makes sense for you
 # these are the REMS settings that are almost certainly going to need to change for
@@ -15,12 +16,13 @@ set -o errexit
 CLOUD_MAP_NAMESPACE=$(head -1 rems-cloudmap-namespace.txt)
 CLOUD_MAP_ID=$(head -2 rems-cloudmap-namespace.txt | tail -1)
 
-HOSTED_PREFIX="rems"
-HOSTED_ZONE_NAME="biocommons.dev"
-HOSTED_ZONE_CERT="arn:aws:acm:ap-southeast-2:497070645708:certificate/f01d2230-149f-4062-967e-86cf74df6a61"
-OIDC_METADATA_URL="https://rems-hgpp-trial.au.auth0.com/.well-known/openid-configuration"
-SMTP_HOST="email-smtp.ap-southeast-2.amazonaws.com"
-SMTP_MAIL_FROM="rems@biocommons.dev"
+HOSTED_PREFIX="rems-qa"
+HOSTED_ZONE_NAME="occ-data.org"
+HOSTED_ZONE_CERT="arn:aws:acm:us-east-1:755379594529:certificate/01b2f346-43b4-43a9-8fde-2a48a3bb29f4"
+HOSTED_ZONE_ID="Z0825773RB8ROG5FFL73"
+OIDC_METADATA_URL="https://accounts.google.com/.well-known/openid-configuration"
+SMTP_HOST="email-smtp.us-east-1.amazonaws.com"
+SMTP_MAIL_FROM="gpx-e@occ-data.org"
 
 (cd iac; npx cdk "$@" \
    --toolkit-stack-name CDKToolkitNew \
@@ -29,11 +31,12 @@ SMTP_MAIL_FROM="rems@biocommons.dev"
    --context "hostedPrefix=$HOSTED_PREFIX" \
    --context "hostedZoneName=$HOSTED_ZONE_NAME" \
    --context "hostedZoneCert=$HOSTED_ZONE_CERT" \
+   --context "hostedZoneId=$HOSTED_ZONE_ID" \
    --context "oidcMetadataUrl=$OIDC_METADATA_URL" \
-   --context "oidcClientId=$(aws ssm get-parameter --name 'oauth_client_id' --output text --query 'Parameter.Value')" \
-   --context "oidcClientSecret=$(aws ssm get-parameter --name 'oauth_client_secret' --output text --query 'Parameter.Value')" \
+   --context "oidcClientId=$(aws ssm get-parameter --name '/rems/oauth_client_id' --with-decryption --output text --query 'Parameter.Value')" \
+   --context "oidcClientSecret=$(aws ssm get-parameter --name '/rems/oauth_client_secret' --with-decryption --output text --query 'Parameter.Value')" \
    --context "smtpHost=$SMTP_HOST" \
    --context "smtpMailFrom=$SMTP_MAIL_FROM" \
-   --context "smtpUser=$(aws ssm get-parameter --name 'smtp_send_user' --output text --query 'Parameter.Value')" \
-   --context "smtpPassword=$(aws ssm get-parameter --name 'smtp_send_password' --output text --query 'Parameter.Value')" \
+   --context "smtpUser=$(aws ssm get-parameter --name '/rems/smtp_send_user' --with-decryption --output text --query 'Parameter.Value')" \
+   --context "smtpPassword=$(aws ssm get-parameter --name '/rems/smtp_send_password' --with-decryption --output text --query 'Parameter.Value')" \
    )

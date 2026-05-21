@@ -1,13 +1,17 @@
 {
   "name": "rems-command-invoke",
   "version": "1.0.0",
-  "description": "A lambda that can execute a pre configured Fargate task in REMS cluster",
-  "main": "index.mjs",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "16.11.43",
+    "aws-cdk": "2.31.1",
+    "prettier": "2.7.1",
+    "ts-node": "10.8.2",
+    "typescript": "4.7.4"
+  },
   "dependencies": {
+    "aws-cdk-lib": "2.31.1",
+    "constructs": "10.1.43",
+    "source-map-support": "0.5.21",
     "@aws-sdk/client-secrets-manager": "^3.52.0",
     "@aws-sdk/client-ecs": "^3.52.0"
   }

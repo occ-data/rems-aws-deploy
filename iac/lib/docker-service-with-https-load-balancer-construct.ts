@@ -51,8 +51,9 @@ export class DockerServiceWithHttpsLoadBalancerConstruct extends Construct {
       "SslCert",
       props.hostedZoneCertArn
     );
-    const domainZone = HostedZone.fromLookup(this, "Zone", {
-      domainName: props.hostedZoneName,
+    const domainZone = HostedZone.fromHostedZoneAttributes(this, "Zone", {
+      hostedZoneId: this.node.tryGetContext('hostedZoneId'),
+      zoneName: props.hostedZoneName,
     });
 
     // a cluster to run things on (will end up being a fargate cluster - so not actual ec2 instances)
