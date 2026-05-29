@@ -113,3 +113,56 @@ passing in these settings, its usage is identical to regular `cdk`.
 - `./rems-cdk deploy` deploy this stack to your default AWS account/region
 - `./rems-cdk diff` compare deployed stack with current state
 - `./rems-cdk destroy` uninstall the entire stack from AWS
+
+### Create an API key
+
+API keys are used to authenticate programmatic access to the REMS API. For example, the cron job that syncs Gen3 projects/resources into REMS uses an API key to create resources and catalogue items.
+
+Before creating an API key, make sure `:enable-api-key true` is set in `iac/rems-docker-image/config.edn`. If you just added it, redeploy first:
+
+```bash
+./rems-cdk.sh deploy
+```
+
+Then create and assign the key:
+
+```bash
+# create the key, choose any name you want
+./rems-cmd.sh "api-key add YOUR_KEY_NAME"
+
+# assign the key to a user, use the email the user logs into REMS with
+./rems-cmd.sh "api-key set-users YOUR_KEY_NAME USER_EMAIL"
+```
+
+To verify the key is working:
+
+```bash
+curl https://YOUR_REMS_DOMAIN/api/catalogue \
+  -H "x-rems-api-key: YOUR_KEY_NAME" \
+  -H "x-rems-user-id: USER_EMAIL"
+```
+
+A successful response returns a JSON array of catalogue items. An empty array `[]` is fine — it means REMS is running but no catalogue items have been created yet.
+
+The key name and user email are then used in the sync script:
+
+```python
+REMS_API_KEY = "YOUR_KEY_NAME"
+REMS_USER    = "USER_EMAIL"
+```
+
+### Fixing 403 Forbidden errors
+
+If you get a `403 Forbidden` / `HTTPError` when running the sync script, the API key does not have permission to access that endpoint. Grant access per endpoint as needed:
+
+```bash
+./rems-cmd.sh "api-key allow-path YOUR_KEY_NAME any /api/resources"
+./rems-cmd.sh "api-key allow-path YOUR_KEY_NAME any /api/licenses"
+./rems-cmd.sh "api-key allow-path YOUR_KEY_NAME any /api/catalogue-items"
+```
+
+Or to allow access to all endpoints at once (not recommended unless necessary):
+
+```bash
+./rems-cmd.sh "api-key allow-path YOUR_KEY_NAME any /api/.*"
+```
