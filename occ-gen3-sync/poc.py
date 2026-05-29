@@ -127,5 +127,4 @@ if __name__ == "__main__":
     mc_ids = list(extract(fetch()).keys())
     print(f"Found {len(mc_ids)} projects\n")
     print("Syncing to REMS...")
-    mc_ids = ["MC-CE40CF", "MC-57ED9B"]
-    sync_to_rems(mc_ids)
+    sync_to_rems(mc_ids[2:4])
